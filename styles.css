@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f9;
+  color: #1d2939;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled, input:disabled { cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid #f4b740; outline-offset: 3px; }
+
+.app-shell { max-width: 1380px; margin: 0 auto; padding: 32px 28px 48px; }
+.page-header, .section-heading, .product-footer, .total-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.page-header { margin-bottom: 28px; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: 5px; font-size: clamp(1.7rem, 3vw, 2.3rem); letter-spacing: -0.04em; }
+h2 { margin-bottom: 0; font-size: 1.25rem; letter-spacing: -0.02em; }
+h3 { margin-bottom: 18px; font-size: 1.06rem; line-height: 1.4; }
+.eyebrow, .section-kicker {
+  margin-bottom: 8px; color: #166263; font-size: 0.73rem; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+}
+.header-description { margin-bottom: 0; color: #58677a; }
+.header-tag {
+  border: 1px solid #c9e4df; border-radius: 999px; padding: 9px 14px;
+  background: #eaf7f3; color: #11605c; font-size: 0.84rem; font-weight: 700; white-space: nowrap;
+}
+.workspace {
+  display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(350px, 1fr);
+  align-items: start; gap: 20px;
+}
+.checkout-column { display: grid; gap: 20px; }
+.panel {
+  min-width: 0; border: 1px solid #dde4ed; border-radius: 16px; padding: 24px;
+  background: #fff; box-shadow: 0 5px 18px rgba(26, 48, 73, 0.04);
+}
+.section-heading { margin-bottom: 24px; }
+.section-note { color: #66758a; font-size: 0.85rem; white-space: nowrap; }
+.catalog-note { margin: -5px 0 18px; color: #66758a; font-size: 0.88rem; }
+.product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.product-card {
+  display: flex; flex-direction: column; min-height: 164px; border: 1px solid #e3e8ef;
+  border-radius: 12px; padding: 18px; background: #fcfdff;
+}
+.product-category {
+  margin-bottom: 9px; color: #677589; font-size: 0.78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+}
+.product-footer { margin-top: auto; }
+.product-price { color: #11605c; font-size: 1.11rem; font-weight: 700; white-space: nowrap; }
+.add-button, .primary-button, .secondary-button { border-radius: 9px; padding: 10px 14px; font-weight: 700; }
+.add-button, .primary-button { border: 1px solid #116c68; background: #116c68; color: #fff; }
+.secondary-button { border: 1px solid #cbd5e1; background: #fff; color: #344054; }
+.add-button:disabled, .primary-button:disabled, .secondary-button:disabled {
+  border-color: #d5dde7; background: #e9edf2; color: #617084;
+}
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 145px; border: 1px dashed #ccd6e2; border-radius: 11px;
+  color: #627187; text-align: center;
+}
+.empty-state p { margin: 5px 0 3px; color: #344054; font-weight: 700; }
+.empty-state span:last-child { font-size: 0.88rem; }
+.empty-icon { color: #116c68; font-size: 1.7rem; line-height: 1; }
+.total-row { margin-top: 20px; border-top: 1px solid #e4e9f0; padding-top: 18px; font-weight: 700; }
+.total-row strong { font-size: 1.55rem; color: #11605c; }
+.payment-panel label { display: block; margin-bottom: 9px; font-weight: 700; }
+.payment-panel input {
+  width: 100%; border: 1px solid #cbd5e1; border-radius: 9px; padding: 12px 14px;
+  color: #1d2939; background: #fff;
+}
+.payment-panel input:disabled { background: #f2f4f7; }
+.field-message { min-height: 1.25rem; margin: 9px 0 16px; color: #66758a; font-size: 0.86rem; line-height: 1.4; }
+.primary-button, .secondary-button { width: 100%; }
+.receipt-placeholder { color: #66758a; line-height: 1.5; }
+.receipt-panel .secondary-button { margin-top: 12px; }
+@media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .app-shell { padding: 20px 14px 32px; }
+  .page-header { align-items: flex-start; }
+  .header-tag { display: none; }
+  .panel { padding: 18px; }
+  .product-grid { grid-template-columns: 1fr; }
+}

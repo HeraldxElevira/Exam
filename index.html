@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Convenience Store POS</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">IT 415 · Scenario 5</p>
+          <h1>Campus Convenience Store</h1>
+          <p class="header-description">Point-of-sale system</p>
+        </div>
+        <span class="header-tag">Cash transactions</span>
+      </header>
+
+      <main class="workspace">
+        <section class="panel catalog-panel" aria-labelledby="products-heading">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">01 · Browse</p>
+              <h2 id="products-heading">Products</h2>
+            </div>
+            <span class="section-note">Prices in PHP</span>
+          </div>
+          <p class="catalog-note">Interface preview: Add to cart is enabled in Stage 2.</p>
+          <div id="product-list" class="product-grid"></div>
+        </section>
+
+        <div class="checkout-column">
+          <section class="panel order-panel" aria-labelledby="order-heading">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">02 · Review</p>
+                <h2 id="order-heading">Order summary</h2>
+              </div>
+            </div>
+            <div class="empty-state" id="cart-empty">
+              <span class="empty-icon" aria-hidden="true">＋</span>
+              <p>Your cart is empty.</p>
+              <span>Choose a product to start an order.</span>
+            </div>
+            <div id="cart-items" aria-live="polite"></div>
+            <div class="total-row">
+              <span>Total due</span>
+              <strong id="order-total">₱0.00</strong>
+            </div>
+          </section>
+
+          <section class="panel payment-panel" aria-labelledby="payment-heading">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">03 · Pay</p>
+                <h2 id="payment-heading">Cash payment</h2>
+              </div>
+            </div>
+            <label for="cash-received">Cash received (₱)</label>
+            <input id="cash-received" type="number" inputmode="decimal" min="0" step="0.01"
+              placeholder="0.00" aria-describedby="payment-message" disabled />
+            <p id="payment-message" class="field-message" aria-live="polite">Cash payment is enabled in Stage 3.</p>
+            <button id="confirm-payment" class="primary-button" type="button" disabled>Confirm payment</button>
+          </section>
+
+          <section class="panel receipt-panel" aria-labelledby="receipt-heading">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">04 · Complete</p>
+                <h2 id="receipt-heading">Digital receipt</h2>
+              </div>
+            </div>
+            <p id="receipt-placeholder" class="receipt-placeholder">A receipt will appear here after a completed payment.</p>
+            <div id="receipt" aria-live="polite"></div>
+            <button id="new-transaction" class="secondary-button" type="button" disabled>New transaction</button>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
