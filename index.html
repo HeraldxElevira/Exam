@@ -59,23 +59,25 @@
               </div>
             </div>
             <p class="payment-due">Total due: <strong id="payment-total">₱0.00</strong></p>
-            <label for="cash-received">Cash received (₱)</label>
-            <input id="cash-received" type="number" inputmode="decimal" min="0" step="0.01"
-              placeholder="0.00" aria-describedby="payment-message" disabled />
-            <p id="payment-message" class="field-message" aria-live="polite">Cash payment is enabled in Stage 3.</p>
-            <button id="confirm-payment" class="primary-button" type="button" disabled>Confirm payment</button>
+            <form id="payment-form" novalidate>
+              <label for="cash-received">Cash received (₱)</label>
+              <input id="cash-received" type="number" inputmode="decimal" min="0" step="0.01"
+                placeholder="0.00" aria-describedby="payment-message" disabled />
+              <p id="payment-message" class="field-message" aria-live="polite">Add an item before payment.</p>
+              <button id="confirm-payment" class="primary-button" type="submit" disabled>Confirm payment</button>
+            </form>
           </section>
 
           <section class="panel receipt-panel" aria-labelledby="receipt-heading">
             <div class="section-heading">
               <div>
                 <p class="section-kicker">04 · Complete</p>
-                <h2 id="receipt-heading">Digital receipt</h2>
+                <h2 id="receipt-heading" tabindex="-1">Digital receipt</h2>
               </div>
             </div>
             <p id="receipt-placeholder" class="receipt-placeholder">A receipt will appear here after a completed payment.</p>
             <div id="receipt" aria-live="polite"></div>
-            <button id="new-transaction" class="secondary-button" type="button" disabled>New transaction</button>
+            <button id="new-transaction" class="secondary-button" type="button">New transaction</button>
           </section>
         </div>
       </main>

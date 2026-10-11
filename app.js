@@ -10,6 +10,8 @@ const PRODUCTS = [
 
 // Product IDs map to quantities for the current, in-memory order.
 const cart = new Map();
+let completedSale = null;
+let transactionNumber = 0;
 
 function formatPeso(centavos) {
   return `₱${(centavos / 100).toFixed(2)}`;
@@ -51,12 +53,13 @@ function renderProducts() {
 }
 
 function addProduct(productId) {
-  if (!PRODUCTS.some((product) => product.id === productId)) return;
+  if (completedSale || !PRODUCTS.some((product) => product.id === productId)) return;
   cart.set(productId, (cart.get(productId) || 0) + 1);
   renderCart();
 }
 
 function changeQuantity(productId, amount) {
+  if (completedSale) return;
   const quantity = cart.get(productId);
   if (!quantity) return;
   // The separate Remove button deletes a line; decrease stops at one.
@@ -65,6 +68,7 @@ function changeQuantity(productId, amount) {
 }
 
 function removeProduct(productId) {
+  if (completedSale) return;
   cart.delete(productId);
   renderCart();
 }
@@ -116,14 +120,14 @@ function renderCart() {
     controls.className = "cart-controls";
     const quantityControls = document.createElement("div");
     quantityControls.className = "quantity-controls";
-    const decrease = createCartButton("−", "decrease", product, quantity === 1);
+    const decrease = createCartButton("−", "decrease", product, quantity === 1 || Boolean(completedSale));
     const count = document.createElement("span");
     count.className = "quantity-value";
     count.textContent = String(quantity);
     count.setAttribute("aria-label", `Quantity: ${quantity}`);
-    const increase = createCartButton("+", "increase", product);
+    const increase = createCartButton("+", "increase", product, Boolean(completedSale));
     quantityControls.append(decrease, count, increase);
-    controls.append(quantityControls, createCartButton("Remove", "remove", product));
+    controls.append(quantityControls, createCartButton("Remove", "remove", product, Boolean(completedSale)));
 
     const subtotal = document.createElement("div");
     subtotal.className = "line-subtotal";
@@ -140,6 +144,145 @@ function renderCart() {
   const total = formatPeso(getTotalCentavos());
   document.querySelector("#order-total").textContent = total;
   document.querySelector("#payment-total").textContent = total;
+  updateCheckoutState();
+}
+
+function setPaymentMessage(message, tone = "") {
+  const messageElement = document.querySelector("#payment-message");
+  messageElement.textContent = message;
+  messageElement.className = `field-message${tone ? ` is-${tone}` : ""}`;
+  document.querySelector("#cash-received").setAttribute("aria-invalid", String(tone === "error"));
+}
+
+function updateCheckoutState() {
+  const hasItems = cart.size > 0;
+  const isComplete = Boolean(completedSale);
+  document.querySelector("#cash-received").disabled = !hasItems || isComplete;
+  document.querySelector("#confirm-payment").disabled = !hasItems || isComplete;
+  for (const button of document.querySelectorAll(".add-button")) button.disabled = isComplete;
+
+  if (isComplete) {
+    setPaymentMessage(`Payment confirmed. Change: ${formatPeso(completedSale.changeCentavos)}.`, "success");
+  } else if (hasItems) {
+    setPaymentMessage("Enter the cash received to confirm this order.");
+  } else {
+    setPaymentMessage("Add an item before payment.");
+  }
+}
+
+// Return a structured result so every invalid payment follows the same path.
+function validatePayment(rawValue, totalCentavos) {
+  if (totalCentavos <= 0) return { error: "Add an item before payment." };
+  const value = rawValue.trim();
+  if (!value) return { error: "Please enter a valid payment amount." };
+  if (Number(value) < 0) return { error: "Cash received cannot be negative." };
+  if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(value)) {
+    return { error: "Enter a numeric cash amount with up to two decimal places." };
+  }
+
+  const paidCentavos = Math.round(Number(value) * 100);
+  if (!Number.isSafeInteger(paidCentavos)) {
+    return { error: "Please enter a valid payment amount." };
+  }
+  if (paidCentavos < totalCentavos) {
+    return { error: `Insufficient payment. Enter at least ${formatPeso(totalCentavos)}.` };
+  }
+  return { paidCentavos, changeCentavos: paidCentavos - totalCentavos };
+}
+
+function makeReceiptCell(tag, text) {
+  const cell = document.createElement(tag);
+  cell.textContent = text;
+  return cell;
+}
+
+function renderReceipt(sale) {
+  const receipt = document.querySelector("#receipt");
+  receipt.replaceChildren();
+  document.querySelector("#receipt-placeholder").hidden = false;
+  if (!sale) return;
+  document.querySelector("#receipt-placeholder").hidden = true;
+
+  const paper = document.createElement("div");
+  paper.className = "receipt-paper";
+  const storeName = document.createElement("p");
+  storeName.className = "receipt-store";
+  storeName.textContent = "Campus Convenience Store";
+  const reference = document.createElement("p");
+  reference.className = "receipt-reference";
+  reference.textContent = `Transaction: ${sale.reference}`;
+
+  const table = document.createElement("table");
+  table.className = "receipt-table";
+  const head = document.createElement("thead");
+  const headingRow = document.createElement("tr");
+  headingRow.append(
+    makeReceiptCell("th", "Item"),
+    makeReceiptCell("th", "Qty"),
+    makeReceiptCell("th", "Subtotal")
+  );
+  head.append(headingRow);
+  const body = document.createElement("tbody");
+  for (const item of sale.items) {
+    const row = document.createElement("tr");
+    const itemCell = makeReceiptCell("td", item.name);
+    const unitPrice = document.createElement("small");
+    unitPrice.textContent = `${formatPeso(item.priceCentavos)} each`;
+    itemCell.append(unitPrice);
+    row.append(
+      itemCell,
+      makeReceiptCell("td", String(item.quantity)),
+      makeReceiptCell("td", formatPeso(item.priceCentavos * item.quantity))
+    );
+    body.append(row);
+  }
+  table.append(head, body);
+
+  const totals = document.createElement("dl");
+  totals.className = "receipt-totals";
+  for (const [label, amount] of [
+    ["Total", sale.totalCentavos],
+    ["Cash received", sale.paidCentavos],
+    ["Change", sale.changeCentavos],
+  ]) {
+    totals.append(makeReceiptCell("dt", label), makeReceiptCell("dd", formatPeso(amount)));
+  }
+  paper.append(storeName, reference, table, totals);
+  receipt.append(paper);
+}
+
+function confirmPayment() {
+  if (completedSale) return;
+  const totalCentavos = getTotalCentavos();
+  const result = validatePayment(document.querySelector("#cash-received").value, totalCentavos);
+  if (result.error) {
+    setPaymentMessage(result.error, "error");
+    return;
+  }
+
+  transactionNumber += 1;
+  completedSale = {
+    reference: `POS-${Date.now()}-${String(transactionNumber).padStart(3, "0")}`,
+    items: [...cart].map(([productId, quantity]) => {
+      const product = PRODUCTS.find((item) => item.id === productId);
+      return { name: product.name, priceCentavos: product.priceCentavos, quantity };
+    }),
+    totalCentavos,
+    paidCentavos: result.paidCentavos,
+    changeCentavos: result.changeCentavos,
+  };
+  renderCart();
+  renderReceipt(completedSale);
+  document.querySelector("#receipt-heading").focus();
+}
+
+function startNewTransaction() {
+  cart.clear();
+  completedSale = null;
+  document.querySelector("#cash-received").value = "";
+  renderCart();
+  renderReceipt(null);
+  document.querySelector(".add-button")?.focus();
 }
 
 document.querySelector("#cart-items").addEventListener("click", (event) => {
@@ -163,6 +306,15 @@ document.querySelector("#cart-items").addEventListener("click", (event) => {
     (nextButton && !nextButton.disabled ? nextButton : fallback)?.focus();
   }
 });
+
+document.querySelector("#payment-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  confirmPayment();
+});
+document.querySelector("#cash-received").addEventListener("input", () => {
+  if (!completedSale) setPaymentMessage("Enter the cash received to confirm this order.");
+});
+document.querySelector("#new-transaction").addEventListener("click", startNewTransaction);
 
 renderProducts();
 renderCart();
